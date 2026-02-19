@@ -1,6 +1,6 @@
 // Firebase configuration for UniAutoMarket
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -23,7 +23,7 @@ export async function fetchCategoriasFromFirebase() {
     const categoriasRef = collection(db, CATEGORIAS_COLLECTION);
     const snapshot = await getDocs(categoriasRef);
     
-    const categorias = [];
+    const categorias: any[] = [];
     snapshot.forEach((doc) => {
       categorias.push({
         id: doc.id,
@@ -39,7 +39,7 @@ export async function fetchCategoriasFromFirebase() {
 }
 
 // Save all categories to Firebase
-export async function saveCategoriasToFirebase(categorias) {
+export async function saveCategoriasToFirebase(categorias: any[]) {
   try {
     for (const categoria of categorias) {
       const categoriaRef = doc(db, CATEGORIAS_COLLECTION, categoria.id);
@@ -53,17 +53,34 @@ export async function saveCategoriasToFirebase(categorias) {
 }
 
 // Subscribe to real-time updates
-export function subscribeToCategorias(callback) {
+export function subscribeToCategorias(callback: (categorias: any[]) => void) {
   const categoriasRef = collection(db, CATEGORIAS_COLLECTION);
   
   return onSnapshot(categoriasRef, async (snapshot) => {
-    const categorias = [];
-    snapshot.forEach((doc) => {
-      categorias.push({
-        id: doc.id,
-        ...doc.data()
+    const categorias: any[] = [];
+    
+    for (const catDoc of snapshot.docs) {
+      const categoriaData = catDoc.data();
+      
+      // Get businesses for this category
+      const negociosRef = collection(db, CATEGORIAS_COLLECTION, catDoc.id, 'negocios');
+      const negociosSnapshot = await getDocs(negociosRef);
+      
+      const negocios: any[] = [];
+      negociosSnapshot.forEach((negDoc) => {
+        negocios.push({
+          id: negDoc.id,
+          ...negDoc.data()
+        });
       });
-    });
+      
+      categorias.push({
+        id: catDoc.id,
+        ...categoriaData,
+        negocios
+      });
+    }
+    
     callback(categorias.sort((a, b) => (a.orden || 0) - (b.orden || 0)));
   }, (error) => {
     console.error('Error in subscription:', error);
