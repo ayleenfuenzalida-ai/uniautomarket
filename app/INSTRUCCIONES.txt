@@ -1,0 +1,54 @@
+========================================
+INSTRUCCIONES - PROYECTO LIMPIO CON FIREBASE
+========================================
+
+ESTOS SON LOS ARCHIVOS QUE DEBES REEMPLAZAR:
+
+1. COPIAR src/utils/firebase.ts
+   → Reemplaza tu archivo: src/utils/firebase.ts
+
+2. COPIAR src/contexts/DataContext.tsx
+   → Reemplaza tu archivo: src/contexts/DataContext.tsx
+
+========================================
+PASOS PARA INSTALAR
+========================================
+
+1. COPIA LOS ARCHIVOS
+   Copia los archivos de esta carpeta a tu proyecto, reemplazando los existentes.
+
+2. INSTALA FIREBASE (si no lo has hecho)
+   npm install firebase
+
+3. CONFIGURA VARIABLES EN VERCEL
+   Ve a Vercel → Settings → Environment Variables y agrega:
+
+   VITE_FIREBASE_API_KEY = AIzaSyCWPzLCFQbS6BOMnkT8R7AkfNm1I0r4cAI
+   VITE_FIREBASE_AUTH_DOMAIN = uniautomarket-f6ffa.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID = uniautomarket-f6ffa
+   VITE_FIREBASE_STORAGE_BUCKET = uniautomarket-f6ffa.firebasestorage.app
+   VITE_FIREBASE_MESSAGING_SENDER_ID = 419809946130
+   VITE_FIREBASE_APP_ID = 1:419809946130:web:b19c58f9203fb42b9d46cb
+
+4. SUBE A GITHUB
+   git add .
+   git commit -m "Implementar Firebase"
+   git push
+
+5. ESPERA EL DEPLOY
+   Ve a vercel.com/dashboard y espera 2-3 minutos
+
+6. PRUEBA
+   Abre tu sitio y crea un negocio
+   Deberia sincronizarse en todos los dispositivos
+
+========================================
+¿QUE HACE ESTO?
+========================================
+
+- Guarda los negocios en Firebase (nube)
+- Sincroniza en tiempo real
+- Todos los dispositivos ven los cambios instantaneamente
+- Los datos no se pierden al cerrar sesion
+
+========================================

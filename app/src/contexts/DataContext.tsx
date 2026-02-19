@@ -33,7 +33,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [categorias, setCategorias] = useState<Categoria[]>(initialCategorias);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Cargar categorías desde Firebase al iniciar
+  // Cargar categorias desde Firebase al iniciar
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
@@ -61,7 +61,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  // Función para sincronizar datos manualmente
+  // Funcion para sincronizar datos manualmente
   const syncData = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -76,7 +76,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Guardar categorías en Firebase
+  // Guardar categorias en Firebase
   const saveToFirebase = useCallback(async (newCategorias: Categoria[]) => {
     try {
       await saveCategoriasToFirebase(newCategorias);
