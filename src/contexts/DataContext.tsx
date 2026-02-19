@@ -1,14 +1,129 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { Categoria, Negocio, Producto, Servicio } from '@/types';
-import { categorias as initialCategorias } from '@/data/marketplace';
-import { 
-  fetchCategoriasFromFirebase, 
+import {
+  fetchCategoriasFromFirebase,
   saveCategoriasToFirebase,
-  subscribeToCategorias 
+  subscribeToCategorias
 } from '@/utils/firebase';
+
+// Datos iniciales por defecto
+const defaultCategorias: Categoria[] = [
+  {
+    id: '1',
+    nombre: 'Desarmadurías',
+    descripcion: 'Encuentra repuestos usados y piezas de vehículos desarmados',
+    imagen: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=800',
+    icono: 'Car',
+    color: '#EF4444',
+    destacada: false,
+    orden: 1,
+    negocios: []
+  },
+  {
+    id: '2',
+    nombre: 'Talleres Mecánicos',
+    descripcion: 'Servicios de reparación y mantenimiento automotriz',
+    imagen: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=800',
+    icono: 'Wrench',
+    color: '#F97316',
+    destacada: false,
+    orden: 2,
+    negocios: []
+  },
+  {
+    id: '3',
+    nombre: 'Herramientas',
+    descripcion: 'Herramientas especializadas para mecánica automotriz',
+    imagen: 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?auto=format&fit=crop&w=800',
+    icono: 'Tool',
+    color: '#F59E0B',
+    destacada: false,
+    orden: 3,
+    negocios: []
+  },
+  {
+    id: '4',
+    nombre: 'Repuestos',
+    descripcion: 'Repuestos nuevos para todo tipo de vehículos',
+    imagen: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=800',
+    icono: 'Package',
+    color: '#10B981',
+    destacada: false,
+    orden: 4,
+    negocios: []
+  },
+  {
+    id: '5',
+    nombre: 'Grúas',
+    descripcion: 'Servicios de grúas y asistencia en ruta',
+    imagen: 'https://images.unsplash.com/photo-1580674285054-bed31e145f59?auto=format&fit=crop&w=800',
+    icono: 'Truck',
+    color: '#06B6D4',
+    destacada: false,
+    orden: 5,
+    negocios: []
+  },
+  {
+    id: '6',
+    nombre: 'Pintura y Desabolladura',
+    descripcion: 'Servicios de pintura y reparación de carrocería',
+    imagen: 'https://images.unsplash.com/photo-1613214149922-f1809c99b414?auto=format&fit=crop&w=800',
+    icono: 'Paintbrush',
+    color: '#3B82F6',
+    destacada: false,
+    orden: 6,
+    negocios: []
+  },
+  {
+    id: '7',
+    nombre: 'Scanner y Diagnóstico',
+    descripcion: 'Diagnóstico computacional de vehículos',
+    imagen: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800',
+    icono: 'Cpu',
+    color: '#6366F1',
+    destacada: false,
+    orden: 7,
+    negocios: []
+  },
+  {
+    id: '8',
+    nombre: 'Electrónica Automotriz',
+    descripcion: 'Reparación de sistemas electrónicos de vehículos',
+    imagen: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=800',
+    icono: 'Zap',
+    color: '#8B5CF6',
+    destacada: false,
+    orden: 8,
+    negocios: []
+  },
+  {
+    id: '9',
+    nombre: 'Reprogramación ECU',
+    descripcion: 'Servicios de reprogramación de centralitas',
+    imagen: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=800',
+    icono: 'Settings',
+    color: '#EC4899',
+    destacada: false,
+    orden: 9,
+    negocios: []
+  }
+];
+
+interface SearchResult {
+  negocio: Negocio;
+  categoria: Categoria;
+}
+
+interface ProductSearchResult {
+  producto: Producto;
+  negocio: Negocio;
+  categoria: Categoria;
+}
 
 interface DataContextType {
   categorias: Categoria[];
+  loading: boolean;
+  isLoading: boolean;
   updateCategoria: (categoria: Categoria) => Promise<void>;
   deleteCategoria: (id: string) => Promise<void>;
   addCategoria: (categoria: Categoria) => Promise<void>;
@@ -23,14 +138,19 @@ interface DataContextType {
   addServicio: (categoriaId: string, negocioId: string, servicio: Servicio) => Promise<void>;
   getNegocioById: (id: string) => Negocio | undefined;
   getCategoriaById: (id: string) => Categoria | undefined;
-  isLoading: boolean;
+  getCategoriaByNegocioId: (negocioId: string) => Categoria | undefined;
+  searchNegocios: (query: string) => SearchResult[];
+  searchProductos: (query: string) => ProductSearchResult[];
+  incrementarVisitas: (negocioId: string) => Promise<void>;
+  addChat: (categoriaId: string, negocioId: string, chat: any) => Promise<void>;
+  addMensajeToChat: (categoriaId: string, negocioId: string, chatId: string, mensaje: any) => Promise<void>;
   syncData: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [categorias, setCategorias] = useState<Categoria[]>(initialCategorias);
+  const [categorias, setCategorias] = useState<Categoria[]>(defaultCategorias);
   const [isLoading, setIsLoading] = useState(true);
 
   // Cargar categorias desde Firebase al iniciar
@@ -48,7 +168,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     };
-    
+
     loadData();
   }, []);
 
@@ -57,7 +177,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const unsubscribe = subscribeToCategorias((updatedCategorias) => {
       setCategorias(updatedCategorias);
     });
-    
+
     return () => unsubscribe();
   }, []);
 
@@ -299,9 +419,155 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return categorias.find(c => c.id === id);
   }, [categorias]);
 
+  const getCategoriaByNegocioId = useCallback((negocioId: string) => {
+    for (const categoria of categorias) {
+      const negocio = categoria.negocios?.find(n => n.id === negocioId);
+      if (negocio) return categoria;
+    }
+    return undefined;
+  }, [categorias]);
+
+  // ==================== BÚSQUEDA ====================
+
+  const searchNegocios = useCallback((query: string): SearchResult[] => {
+    if (!query.trim()) return [];
+    
+    const results: SearchResult[] = [];
+    const lowerQuery = query.toLowerCase();
+    
+    for (const categoria of categorias) {
+      for (const negocio of categoria.negocios || []) {
+        if (
+          negocio.nombre?.toLowerCase().includes(lowerQuery) ||
+          negocio.descripcion?.toLowerCase().includes(lowerQuery) ||
+          negocio.direccion?.toLowerCase().includes(lowerQuery)
+        ) {
+          results.push({ negocio, categoria });
+        }
+      }
+    }
+    
+    return results;
+  }, [categorias]);
+
+  const searchProductos = useCallback((query: string): ProductSearchResult[] => {
+    if (!query.trim()) return [];
+    
+    const results: ProductSearchResult[] = [];
+    const lowerQuery = query.toLowerCase();
+    
+    for (const categoria of categorias) {
+      for (const negocio of categoria.negocios || []) {
+        for (const producto of negocio.productos || []) {
+          if (
+            producto.nombre?.toLowerCase().includes(lowerQuery) ||
+            producto.descripcion?.toLowerCase().includes(lowerQuery)
+          ) {
+            results.push({ producto, negocio, categoria });
+          }
+        }
+      }
+    }
+    
+    return results;
+  }, [categorias]);
+
+  // ==================== VISITAS Y CHAT ====================
+
+  const incrementarVisitas = useCallback(async (negocioId: string) => {
+    // Buscar la categoría que contiene este negocio
+    let categoriaId: string | null = null;
+    for (const categoria of categorias) {
+      const negocio = categoria.negocios?.find(n => n.id === negocioId);
+      if (negocio) {
+        categoriaId = categoria.id;
+        break;
+      }
+    }
+    
+    if (!categoriaId) {
+      console.warn('No se encontró la categoría para el negocio:', negocioId);
+      return;
+    }
+
+    const newCategorias = categorias.map(c => {
+      if (c.id === categoriaId) {
+        return {
+          ...c,
+          negocios: (c.negocios || []).map(n => {
+            if (n.id === negocioId) {
+              return {
+                ...n,
+                visitas: (n.visitas || 0) + 1
+              };
+            }
+            return n;
+          })
+        };
+      }
+      return c;
+    });
+    setCategorias(newCategorias);
+    await saveToFirebase(newCategorias);
+  }, [categorias, saveToFirebase]);
+
+  const addChat = useCallback(async (categoriaId: string, negocioId: string, chat: any) => {
+    const newCategorias = categorias.map(c => {
+      if (c.id === categoriaId) {
+        return {
+          ...c,
+          negocios: (c.negocios || []).map(n => {
+            if (n.id === negocioId) {
+              return {
+                ...n,
+                chats: [...(n.chats || []), chat]
+              };
+            }
+            return n;
+          })
+        };
+      }
+      return c;
+    });
+    setCategorias(newCategorias);
+    await saveToFirebase(newCategorias);
+  }, [categorias, saveToFirebase]);
+
+  const addMensajeToChat = useCallback(async (categoriaId: string, negocioId: string, chatId: string, mensaje: any) => {
+    const newCategorias = categorias.map(c => {
+      if (c.id === categoriaId) {
+        return {
+          ...c,
+          negocios: (c.negocios || []).map(n => {
+            if (n.id === negocioId) {
+              return {
+                ...n,
+                chats: (n.chats || []).map(ch => {
+                  if (ch.id === chatId) {
+                    return {
+                      ...ch,
+                      mensajes: [...(ch.mensajes || []), mensaje]
+                    };
+                  }
+                  return ch;
+                })
+              };
+            }
+            return n;
+          })
+        };
+      }
+      return c;
+    });
+    setCategorias(newCategorias);
+    await saveToFirebase(newCategorias);
+  }, [categorias, saveToFirebase]);
+
   return (
     <DataContext.Provider value={{
       categorias,
+      loading: isLoading,
+      isLoading,
       updateCategoria,
       deleteCategoria,
       addCategoria,
@@ -316,7 +582,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       addServicio,
       getNegocioById,
       getCategoriaById,
-      isLoading,
+      getCategoriaByNegocioId,
+      searchNegocios,
+      searchProductos,
+      incrementarVisitas,
+      addChat,
+      addMensajeToChat,
       syncData
     }}>
       {children}
