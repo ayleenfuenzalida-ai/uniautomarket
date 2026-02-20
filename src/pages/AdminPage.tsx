@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import { useCompany } from '@/contexts/CompanyContext';
 import { ImageUpload } from '@/components/ImageUpload';
-import type { Negocio, Usuario, Producto } from '@/types';
+import type { Negocio, Usuario, Producto, Categoria } from '@/types';
 
 interface AdminPageProps {
   onBack: () => void;
@@ -19,17 +19,46 @@ interface AdminPageProps {
 
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
+const ICONOS_CATEGORIA = [
+  { value: 'Car', label: 'Auto' },
+  { value: 'Wrench', label: 'Herramienta' },
+  { value: 'Tool', label: 'Herramienta 2' },
+  { value: 'Package', label: 'Paquete' },
+  { value: 'Truck', label: 'Camión' },
+  { value: 'Paintbrush', label: 'Pincel' },
+  { value: 'Cpu', label: 'CPU' },
+  { value: 'Zap', label: 'Electricidad' },
+  { value: 'Settings', label: 'Configuración' },
+  { value: 'Gauge', label: 'Medidor' },
+  { value: 'Fuel', label: 'Combustible' },
+  { value: 'Battery', label: 'Batería' },
+];
+
+const COLORES_CATEGORIA = [
+  { value: '#EF4444', label: 'Rojo' },
+  { value: '#F97316', label: 'Naranja' },
+  { value: '#F59E0B', label: 'Ámbar' },
+  { value: '#10B981', label: 'Verde' },
+  { value: '#06B6D4', label: 'Cyan' },
+  { value: '#3B82F6', label: 'Azul' },
+  { value: '#6366F1', label: 'Índigo' },
+  { value: '#8B5CF6', label: 'Violeta' },
+  { value: '#EC4899', label: 'Rosa' },
+  { value: '#6B7280', label: 'Gris' },
+];
+
 export function AdminPage({ onBack }: AdminPageProps) {
   const { usuario, isSuperAdmin, isAdmin, usuarios, deleteUser, createUser } = useAuth();
-  const { categorias, deleteCategoria, deleteNegocio, addNegocio, addProducto } = useData();
+  const { categorias, deleteCategoria, deleteNegocio, addNegocio, addProducto, addCategoria } = useData();
   useCompany();
 
   const [isAddNegocioOpen, setIsAddNegocioOpen] = useState(false);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [isAddProductoOpen, setIsAddProductoOpen] = useState(false);
+  const [isAddCategoriaOpen, setIsAddCategoriaOpen] = useState(false);
   const [selectedCategoriaId, setSelectedCategoriaId] = useState('');
   const [selectedNegocioId, setSelectedNegocioId] = useState('');
-  
+
   const [nuevoNegocio, setNuevoNegocio] = useState<Partial<Negocio> & { imagenes: string[] }>({
     nombre: '',
     descripcion: '',
@@ -57,6 +86,17 @@ export function AdminPage({ onBack }: AdminPageProps) {
     stock: 0,
     sku: '',
     categoria: '',
+  });
+
+  const [nuevaCategoria, setNuevaCategoria] = useState<Partial<Categoria> & { imagenes: string[] }>({
+    nombre: '',
+    descripcion: '',
+    imagenes: [],
+    icono: 'Car',
+    color: '#EF4444',
+    destacada: false,
+    orden: 0,
+    negocios: [],
   });
 
   const [nuevoUsuario, setNuevoUsuario] = useState<Partial<Usuario>>({
@@ -87,7 +127,7 @@ export function AdminPage({ onBack }: AdminPageProps) {
 
   const handleAddUsuario = async () => {
     if (!nuevoUsuario.nombre || !nuevoUsuario.email) return;
-    
+
     await createUser({
       nombre: nuevoUsuario.nombre,
       email: nuevoUsuario.email,
@@ -95,14 +135,46 @@ export function AdminPage({ onBack }: AdminPageProps) {
       negocioId: nuevoUsuario.negocioId,
       favoritos: []
     });
-    
+
     setIsAddUserOpen(false);
     setNuevoUsuario({ nombre: '', email: '', tipo: 'client', negocioId: undefined });
   };
 
+  const handleAddCategoria = async () => {
+    if (!nuevaCategoria.nombre || nuevaCategoria.imagenes.length === 0) {
+      alert('Por favor ingresa un nombre y sube al menos una imagen para la categoría');
+      return;
+    }
+
+    const categoria: Categoria = {
+      id: `categoria-${Date.now()}`,
+      nombre: nuevaCategoria.nombre || '',
+      descripcion: nuevaCategoria.descripcion || '',
+      imagen: nuevaCategoria.imagenes[0] || '',
+      icono: nuevaCategoria.icono || 'Car',
+      color: nuevaCategoria.color || '#EF4444',
+      destacada: nuevaCategoria.destacada || false,
+      orden: categorias.length + 1,
+      negocios: [],
+    };
+
+    await addCategoria(categoria);
+    setIsAddCategoriaOpen(false);
+    setNuevaCategoria({
+      nombre: '',
+      descripcion: '',
+      imagenes: [],
+      icono: 'Car',
+      color: '#EF4444',
+      destacada: false,
+      orden: 0,
+      negocios: [],
+    });
+  };
+
   const handleAddNegocio = async () => {
     if (!selectedCategoriaId || !nuevoNegocio.nombre || nuevoNegocio.imagenes.length === 0) return;
-    
+
     const negocio: Negocio = {
       id: Date.now().toString(),
       nombre: nuevoNegocio.nombre || '',
@@ -143,7 +215,7 @@ export function AdminPage({ onBack }: AdminPageProps) {
 
   const handleAddProducto = async () => {
     if (!selectedCategoriaId || !selectedNegocioId || !nuevoProducto.nombre || nuevoProducto.imagenes.length === 0) return;
-    
+
     const producto: Producto = {
       id: `producto-${Date.now()}`,
       nombre: nuevoProducto.nombre || '',
@@ -164,7 +236,7 @@ export function AdminPage({ onBack }: AdminPageProps) {
     setSelectedNegocioId('');
   };
 
-  const negociosDeCategoria = selectedCategoriaId 
+  const negociosDeCategoria = selectedCategoriaId
     ? categorias.find(c => c.id === selectedCategoriaId)?.negocios || []
     : [];
 
@@ -241,8 +313,7 @@ export function AdminPage({ onBack }: AdminPageProps) {
                           </SelectContent>
                         </Select>
                       </div>
-                      
-                      {/* Subir imágenes del negocio */}
+
                       <ImageUpload
                         images={nuevoNegocio.imagenes}
                         onChange={(imgs) => setNuevoNegocio({ ...nuevoNegocio, imagenes: imgs })}
@@ -252,8 +323,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
 
                       <div>
                         <Label className="text-gray-400">Nombre del Negocio *</Label>
-                        <Input 
-                          value={nuevoNegocio.nombre} 
+                        <Input
+                          value={nuevoNegocio.nombre}
                           onChange={(e) => setNuevoNegocio({...nuevoNegocio, nombre: e.target.value})}
                           className="bg-[#0a0a0a] border-gray-700 text-white"
                           placeholder="Ej: Repuestos El Rápido"
@@ -261,8 +332,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                       </div>
                       <div>
                         <Label className="text-gray-400">Descripción</Label>
-                        <Textarea 
-                          value={nuevoNegocio.descripcion} 
+                        <Textarea
+                          value={nuevoNegocio.descripcion}
                           onChange={(e) => setNuevoNegocio({...nuevoNegocio, descripcion: e.target.value})}
                           className="bg-[#0a0a0a] border-gray-700 text-white"
                           placeholder="Describe el negocio..."
@@ -271,8 +342,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label className="text-gray-400">Dirección</Label>
-                          <Input 
-                            value={nuevoNegocio.direccion} 
+                          <Input
+                            value={nuevoNegocio.direccion}
                             onChange={(e) => setNuevoNegocio({...nuevoNegocio, direccion: e.target.value})}
                             className="bg-[#0a0a0a] border-gray-700 text-white"
                             placeholder="Av. Principal 123"
@@ -280,8 +351,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                         </div>
                         <div>
                           <Label className="text-gray-400">Comuna</Label>
-                          <Input 
-                            value={nuevoNegocio.comuna} 
+                          <Input
+                            value={nuevoNegocio.comuna}
                             onChange={(e) => setNuevoNegocio({...nuevoNegocio, comuna: e.target.value})}
                             className="bg-[#0a0a0a] border-gray-700 text-white"
                             placeholder="Providencia"
@@ -291,8 +362,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label className="text-gray-400">Teléfono</Label>
-                          <Input 
-                            value={nuevoNegocio.telefono} 
+                          <Input
+                            value={nuevoNegocio.telefono}
                             onChange={(e) => setNuevoNegocio({...nuevoNegocio, telefono: e.target.value})}
                             className="bg-[#0a0a0a] border-gray-700 text-white"
                             placeholder="+56 9 1234 5678"
@@ -300,8 +371,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                         </div>
                         <div>
                           <Label className="text-gray-400">WhatsApp</Label>
-                          <Input 
-                            value={nuevoNegocio.whatsapp} 
+                          <Input
+                            value={nuevoNegocio.whatsapp}
                             onChange={(e) => setNuevoNegocio({...nuevoNegocio, whatsapp: e.target.value})}
                             className="bg-[#0a0a0a] border-gray-700 text-white"
                             placeholder="+56 9 1234 5678"
@@ -310,8 +381,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                       </div>
                       <div>
                         <Label className="text-gray-400">Email</Label>
-                        <Input 
-                          value={nuevoNegocio.email} 
+                        <Input
+                          value={nuevoNegocio.email}
                           onChange={(e) => setNuevoNegocio({...nuevoNegocio, email: e.target.value})}
                           className="bg-[#0a0a0a] border-gray-700 text-white"
                           placeholder="contacto@negocio.cl"
@@ -320,27 +391,27 @@ export function AdminPage({ onBack }: AdminPageProps) {
                       </div>
                       <div className="flex gap-4">
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={nuevoNegocio.destacado} 
+                          <input
+                            type="checkbox"
+                            checked={nuevoNegocio.destacado}
                             onChange={(e) => setNuevoNegocio({...nuevoNegocio, destacado: e.target.checked})}
                             className="w-4 h-4"
                           />
                           <span className="text-gray-400">Destacado</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={nuevoNegocio.verificado} 
+                          <input
+                            type="checkbox"
+                            checked={nuevoNegocio.verificado}
                             onChange={(e) => setNuevoNegocio({...nuevoNegocio, verificado: e.target.checked})}
                             className="w-4 h-4"
                           />
                           <span className="text-gray-400">Verificado</span>
                         </label>
                       </div>
-                      <Button 
-                        onClick={handleAddNegocio} 
-                        className="w-full bg-red-600 hover:bg-red-700 text-white" 
+                      <Button
+                        onClick={handleAddNegocio}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white"
                         disabled={!selectedCategoriaId || !nuevoNegocio.nombre || nuevoNegocio.imagenes.length === 0}
                       >
                         Guardar Negocio
@@ -349,7 +420,7 @@ export function AdminPage({ onBack }: AdminPageProps) {
                   </DialogContent>
                 </Dialog>
               </div>
-              
+
               {categorias.map((categoria) => (
                 <div key={categoria.id} className="bg-[#111111] rounded-xl border border-gray-800 overflow-hidden">
                   <div className="p-4 bg-gray-800/50 border-b border-gray-800">
@@ -407,7 +478,7 @@ export function AdminPage({ onBack }: AdminPageProps) {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       {selectedCategoriaId && (
                         <div>
                           <Label className="text-gray-400">Negocio *</Label>
@@ -424,19 +495,17 @@ export function AdminPage({ onBack }: AdminPageProps) {
                         </div>
                       )}
 
-                      {/* Subir imágenes del producto - EXACTAMENTE 5 */}
                       <ImageUpload
                         images={nuevoProducto.imagenes}
                         onChange={(imgs) => setNuevoProducto({ ...nuevoProducto, imagenes: imgs })}
                         maxImages={5}
-                        minImages={5}
-                        label="Fotos del producto * (OBLIGATORIO: exactamente 5 imágenes para marketplace)"
+                        label="Fotos del producto * (máx. 5, la primera será la principal)"
                       />
 
                       <div>
                         <Label className="text-gray-400">Nombre del Producto *</Label>
-                        <Input 
-                          value={nuevoProducto.nombre} 
+                        <Input
+                          value={nuevoProducto.nombre}
                           onChange={(e) => setNuevoProducto({...nuevoProducto, nombre: e.target.value})}
                           className="bg-[#0a0a0a] border-gray-700 text-white"
                           placeholder="Ej: Filtro de aceite Toyota"
@@ -444,8 +513,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                       </div>
                       <div>
                         <Label className="text-gray-400">Descripción</Label>
-                        <Textarea 
-                          value={nuevoProducto.descripcion} 
+                        <Textarea
+                          value={nuevoProducto.descripcion}
                           onChange={(e) => setNuevoProducto({...nuevoProducto, descripcion: e.target.value})}
                           className="bg-[#0a0a0a] border-gray-700 text-white"
                           placeholder="Describe el producto..."
@@ -454,9 +523,9 @@ export function AdminPage({ onBack }: AdminPageProps) {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label className="text-gray-400">Precio *</Label>
-                          <Input 
+                          <Input
                             type="number"
-                            value={nuevoProducto.precio} 
+                            value={nuevoProducto.precio}
                             onChange={(e) => setNuevoProducto({...nuevoProducto, precio: Number(e.target.value)})}
                             className="bg-[#0a0a0a] border-gray-700 text-white"
                             placeholder="29990"
@@ -464,9 +533,9 @@ export function AdminPage({ onBack }: AdminPageProps) {
                         </div>
                         <div>
                           <Label className="text-gray-400">Stock</Label>
-                          <Input 
+                          <Input
                             type="number"
-                            value={nuevoProducto.stock} 
+                            value={nuevoProducto.stock}
                             onChange={(e) => setNuevoProducto({...nuevoProducto, stock: Number(e.target.value)})}
                             className="bg-[#0a0a0a] border-gray-700 text-white"
                             placeholder="10"
@@ -475,26 +544,25 @@ export function AdminPage({ onBack }: AdminPageProps) {
                       </div>
                       <div>
                         <Label className="text-gray-400">SKU</Label>
-                        <Input 
-                          value={nuevoProducto.sku} 
+                        <Input
+                          value={nuevoProducto.sku}
                           onChange={(e) => setNuevoProducto({...nuevoProducto, sku: e.target.value})}
                           className="bg-[#0a0a0a] border-gray-700 text-white"
                           placeholder="ABC-123"
                         />
                       </div>
-                      <Button 
-                        onClick={handleAddProducto} 
-                        className="w-full bg-red-600 hover:bg-red-700 text-white" 
-                        disabled={!selectedCategoriaId || !selectedNegocioId || !nuevoProducto.nombre || nuevoProducto.imagenes.length !== 5}
+                      <Button
+                        onClick={handleAddProducto}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white"
+                        disabled={!selectedCategoriaId || !selectedNegocioId || !nuevoProducto.nombre || nuevoProducto.imagenes.length === 0}
                       >
-                        Guardar Producto {nuevoProducto.imagenes.length !== 5 && `(${nuevoProducto.imagenes.length}/5 imágenes)`}
+                        Guardar Producto
                       </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
               </div>
 
-              {/* Lista de productos por categoría */}
               {categorias.map((categoria) => (
                 <div key={categoria.id} className="bg-[#111111] rounded-xl border border-gray-800 overflow-hidden">
                   <div className="p-4 bg-gray-800/50 border-b border-gray-800">
@@ -526,24 +594,140 @@ export function AdminPage({ onBack }: AdminPageProps) {
           </TabsContent>
 
           <TabsContent value="categorias">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categorias.map((categoria) => (
-                <div key={categoria.id} className="bg-[#111111] rounded-xl overflow-hidden border border-gray-800 group">
-                  <div className="relative h-40">
-                    <img src={categoria.imagen} alt={categoria.nombre} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                    <div className="absolute bottom-3 left-3 right-3">
-                      <h3 className="font-semibold text-white">{categoria.nombre}</h3>
-                      <p className="text-gray-300 text-sm">{categoria.negocios.length} negocios</p>
+            <div className="space-y-6">
+              <div className="flex justify-end">
+                <Dialog open={isAddCategoriaOpen} onOpenChange={setIsAddCategoriaOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-red-600 hover:bg-red-700 text-white">
+                      <Plus className="w-4 h-4 mr-2" />Agregar Categoría
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-[#111111] border-gray-800 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Agregar Nueva Categoría</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <ImageUpload
+                        images={nuevaCategoria.imagenes}
+                        onChange={(imgs) => setNuevaCategoria({ ...nuevaCategoria, imagenes: imgs })}
+                        maxImages={1}
+                        label="Imagen de la categoría * (será la imagen de fondo)"
+                      />
+
+                      <div>
+                        <Label className="text-gray-400">Nombre de la Categoría *</Label>
+                        <Input
+                          value={nuevaCategoria.nombre}
+                          onChange={(e) => setNuevaCategoria({...nuevaCategoria, nombre: e.target.value})}
+                          className="bg-[#0a0a0a] border-gray-700 text-white"
+                          placeholder="Ej: Desarmadurías"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-gray-400">Descripción</Label>
+                        <Textarea
+                          value={nuevaCategoria.descripcion}
+                          onChange={(e) => setNuevaCategoria({...nuevaCategoria, descripcion: e.target.value})}
+                          className="bg-[#0a0a0a] border-gray-700 text-white"
+                          placeholder="Describe la categoría..."
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-gray-400">Icono</Label>
+                          <Select 
+                            value={nuevaCategoria.icono} 
+                            onValueChange={(v) => setNuevaCategoria({...nuevaCategoria, icono: v})}
+                          >
+                            <SelectTrigger className="bg-[#0a0a0a] border-gray-700 text-white">
+                              <SelectValue placeholder="Selecciona un icono" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#111111] border-gray-700">
+                              {ICONOS_CATEGORIA.map(icono => (
+                                <SelectItem key={icono.value} value={icono.value} className="text-white">
+                                  {icono.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-gray-400">Color</Label>
+                          <Select 
+                            value={nuevaCategoria.color} 
+                            onValueChange={(v) => setNuevaCategoria({...nuevaCategoria, color: v})}
+                          >
+                            <SelectTrigger className="bg-[#0a0a0a] border-gray-700 text-white">
+                              <SelectValue placeholder="Selecciona un color" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#111111] border-gray-700">
+                              {COLORES_CATEGORIA.map(color => (
+                                <SelectItem key={color.value} value={color.value} className="text-white">
+                                  <div className="flex items-center gap-2">
+                                    <div 
+                                      className="w-4 h-4 rounded-full" 
+                                      style={{ backgroundColor: color.value }}
+                                    />
+                                    {color.label}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={nuevaCategoria.destacada}
+                          onChange={(e) => setNuevaCategoria({...nuevaCategoria, destacada: e.target.checked})}
+                          className="w-4 h-4"
+                        />
+                        <Label className="text-gray-400 cursor-pointer">Categoría destacada</Label>
+                      </div>
+
+                      <Button
+                        onClick={handleAddCategoria}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white"
+                        disabled={!nuevaCategoria.nombre || nuevaCategoria.imagenes.length === 0}
+                      >
+                        Guardar Categoría
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categorias.map((categoria) => (
+                  <div key={categoria.id} className="bg-[#111111] rounded-xl overflow-hidden border border-gray-800 group">
+                    <div className="relative h-40">
+                      <img src={categoria.imagen} alt={categoria.nombre} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <h3 className="font-semibold text-white">{categoria.nombre}</h3>
+                        <p className="text-gray-300 text-sm">{categoria.negocios.length} negocios</p>
+                      </div>
+                      {categoria.destacada && (
+                        <div className="absolute top-3 right-3">
+                          <span className="px-2 py-1 bg-amber-500 text-black text-xs font-semibold rounded">
+                            Destacada
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3 flex justify-end">
+                      <Button variant="ghost" size="sm" onClick={() => deleteCategoria(categoria.id)} className="text-gray-400 hover:text-red-400">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="p-3 flex justify-end">
-                    <Button variant="ghost" size="sm" onClick={() => deleteCategoria(categoria.id)} className="text-gray-400 hover:text-red-400">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </TabsContent>
 
@@ -564,8 +748,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                       <div className="space-y-4 py-4">
                         <div>
                           <Label className="text-gray-400">Nombre completo</Label>
-                          <Input 
-                            value={nuevoUsuario.nombre} 
+                          <Input
+                            value={nuevoUsuario.nombre}
                             onChange={(e) => setNuevoUsuario({...nuevoUsuario, nombre: e.target.value})}
                             className="bg-[#0a0a0a] border-gray-700 text-white"
                             placeholder="Juan Pérez"
@@ -573,8 +757,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                         </div>
                         <div>
                           <Label className="text-gray-400">Email</Label>
-                          <Input 
-                            value={nuevoUsuario.email} 
+                          <Input
+                            value={nuevoUsuario.email}
                             onChange={(e) => setNuevoUsuario({...nuevoUsuario, email: e.target.value})}
                             className="bg-[#0a0a0a] border-gray-700 text-white"
                             placeholder="usuario@ejemplo.cl"
@@ -583,8 +767,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                         </div>
                         <div>
                           <Label className="text-gray-400">Tipo de usuario</Label>
-                          <Select 
-                            value={nuevoUsuario.tipo} 
+                          <Select
+                            value={nuevoUsuario.tipo}
                             onValueChange={(v) => setNuevoUsuario({...nuevoUsuario, tipo: v as 'client' | 'business' | 'admin', negocioId: v === 'business' ? nuevoUsuario.negocioId : undefined})}
                           >
                             <SelectTrigger className="bg-[#0a0a0a] border-gray-700 text-white">
@@ -600,8 +784,8 @@ export function AdminPage({ onBack }: AdminPageProps) {
                         {nuevoUsuario.tipo === 'business' && (
                           <div>
                             <Label className="text-gray-400">Negocio asignado</Label>
-                            <Select 
-                              value={nuevoUsuario.negocioId} 
+                            <Select
+                              value={nuevoUsuario.negocioId}
                               onValueChange={(v) => setNuevoUsuario({...nuevoUsuario, negocioId: v})}
                             >
                               <SelectTrigger className="bg-[#0a0a0a] border-gray-700 text-white">
@@ -618,9 +802,9 @@ export function AdminPage({ onBack }: AdminPageProps) {
                             <p className="text-gray-500 text-xs mt-2">El usuario podrá administrar este negocio</p>
                           </div>
                         )}
-                        <Button 
-                          onClick={handleAddUsuario} 
-                          className="w-full bg-red-600 hover:bg-red-700 text-white" 
+                        <Button
+                          onClick={handleAddUsuario}
+                          className="w-full bg-red-600 hover:bg-red-700 text-white"
                           disabled={!nuevoUsuario.nombre || !nuevoUsuario.email}
                         >
                           Crear Usuario
@@ -647,13 +831,13 @@ export function AdminPage({ onBack }: AdminPageProps) {
                           <td className="px-4 py-3 text-gray-400">{user.email}</td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 rounded text-xs ${
-                              user.tipo === 'superadmin' ? 'bg-amber-500/20 text-amber-400' : 
-                              user.tipo === 'admin' ? 'bg-blue-500/20 text-blue-400' : 
+                              user.tipo === 'superadmin' ? 'bg-amber-500/20 text-amber-400' :
+                              user.tipo === 'admin' ? 'bg-blue-500/20 text-blue-400' :
                               user.tipo === 'business' ? 'bg-purple-500/20 text-purple-400' :
                               'bg-gray-500/20 text-gray-400'
                             }`}>
-                              {user.tipo === 'superadmin' ? 'Super Admin' : 
-                               user.tipo === 'admin' ? 'Admin' : 
+                              {user.tipo === 'superadmin' ? 'Super Admin' :
+                               user.tipo === 'admin' ? 'Admin' :
                                user.tipo === 'business' ? 'Negocio' : 'Cliente'}
                             </span>
                           </td>
