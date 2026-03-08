@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { businessesAPI, categoriesAPI } from '../../../src/services/api';
 import { COLORS } from '../../../src/utils/colors';
@@ -67,6 +68,18 @@ export default function CreateBusinessScreen() {
     console.log('Owner Name:', ownerName);
     console.log('Owner Email:', ownerEmail);
     
+    // Check if user is logged in
+    const token = await AsyncStorage.getItem('token');
+    const userData = await AsyncStorage.getItem('user');
+    console.log('Token exists:', !!token);
+    console.log('User data:', userData);
+    
+    if (!token) {
+      Alert.alert('Error', 'Sesión expirada. Por favor inicia sesión nuevamente.');
+      router.replace('/(auth)/login');
+      return;
+    }
+    
     if (!name || !description || !address || !ownerName || !ownerEmail || !ownerPassword || !selectedCategory) {
       Alert.alert('Error', 'Por favor completa todos los campos obligatorios');
       return;
@@ -100,7 +113,15 @@ export default function CreateBusinessScreen() {
     } catch (error: any) {
       console.error('Error creating business:', error);
       console.error('Error response:', error.response?.data);
-      Alert.alert('Error', error.response?.data?.detail || 'Error al crear negocio');
+      
+      if (error.response?.status === 403) {
+        Alert.alert('Error', 'No tienes permisos para crear negocios. Debes ser administrador.');
+      } else if (error.response?.status === 401) {
+        Alert.alert('Error', 'Sesión expirada. Por favor inicia sesión nuevamente.');
+        router.replace('/(auth)/login');
+      } else {
+        Alert.alert('Error', error.response?.data?.detail || 'Error al crear negocio');
+      }
     } finally {
       setLoading(false);
     }
