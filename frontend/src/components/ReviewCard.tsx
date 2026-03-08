@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../utils/colors';
 
 interface ReviewCardProps {
   review: any;
@@ -13,7 +14,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
         key={index}
         name={index < review.rating ? 'star' : 'star-outline'}
         size={16}
-        color="#FFC107"
+        color={COLORS.star}
       />
     ));
   };
@@ -42,10 +43,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: COLORS.backgroundCard,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   header: {
     flexDirection: 'row',
@@ -56,12 +59,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.neonRed,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 18,
     fontWeight: '600',
   },
@@ -72,7 +75,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: COLORS.textPrimary,
     marginBottom: 4,
   },
   starsContainer: {
@@ -80,11 +83,11 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 12,
-    color: '#999',
+    color: COLORS.textMuted,
   },
   comment: {
     fontSize: 14,
-    color: '#333',
+    color: COLORS.textSecondary,
     lineHeight: 20,
   },
 });

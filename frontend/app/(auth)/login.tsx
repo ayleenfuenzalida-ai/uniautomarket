@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../../src/utils/colors';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -33,7 +34,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email.toLowerCase().trim(), password);
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/home');
     } catch (error: any) {
       Alert.alert('Error', error.message);
     } finally {
@@ -49,17 +50,18 @@ export default function LoginScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
-            <Ionicons name="car-sport" size={64} color="#007AFF" />
+            <Ionicons name="car-sport" size={64} color={COLORS.neonRed} />
             <Text style={styles.title}>Universal AutoMarket</Text>
             <Text style={styles.subtitle}>Marketplace Automotriz #1 de Chile</Text>
           </View>
 
           <View style={styles.form}>
             <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
+              <Ionicons name="mail-outline" size={20} color={COLORS.neonRed} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Correo electrónico"
+                placeholderTextColor={COLORS.textMuted}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -69,10 +71,11 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
+              <Ionicons name="lock-closed-outline" size={20} color={COLORS.neonRed} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Contraseña"
+                placeholderTextColor={COLORS.textMuted}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -82,7 +85,7 @@ export default function LoginScreen() {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color="#666"
+                  color={COLORS.textMuted}
                 />
               </TouchableOpacity>
             </View>
@@ -93,7 +96,7 @@ export default function LoginScreen() {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={COLORS.textPrimary} />
               ) : (
                 <Text style={styles.buttonText}>Iniciar Sesión</Text>
               )}
@@ -115,7 +118,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   keyboardView: {
     flex: 1,
@@ -132,13 +135,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: COLORS.neonRed,
     marginTop: 16,
     textAlign: 'center',
+    textShadowColor: COLORS.neonRed,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -148,8 +154,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.backgroundCard,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     paddingHorizontal: 16,
     marginBottom: 16,
     height: 56,
@@ -160,21 +168,26 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#1a1a1a',
+    color: COLORS.textPrimary,
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.neonRed,
     borderRadius: 12,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 8,
+    shadowColor: COLORS.neonRed,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 8,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -185,11 +198,11 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textSecondary,
   },
   link: {
     fontSize: 14,
-    color: '#007AFF',
+    color: COLORS.neonRed,
     fontWeight: '600',
   },
 });

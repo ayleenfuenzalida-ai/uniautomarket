@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, SHADOWS } from '../utils/colors';
 
 interface BusinessCardProps {
   business: any;
@@ -19,19 +20,20 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onPress }) => {
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.rating}>
-            <Ionicons name="star" size={16} color="#FFC107" />
+            <Ionicons name="star" size={16} color={COLORS.star} />
             <Text style={styles.ratingText}>{business.rating || 0}</Text>
           </View>
           {business.is_featured && (
             <View style={styles.featuredBadge}>
-              <Text style={styles.featuredText}>Destacado</Text>
+              <Ionicons name="star" size={12} color={COLORS.textPrimary} />
+              <Text style={styles.featuredText}>DESTACADO</Text>
             </View>
           )}
         </View>
         <Text style={styles.name} numberOfLines={1}>{business.name}</Text>
         <Text style={styles.description} numberOfLines={2}>{business.description}</Text>
         <View style={styles.footer}>
-          <Ionicons name="location-outline" size={14} color="#666" />
+          <Ionicons name="location-outline" size={14} color={COLORS.neonRed} />
           <Text style={styles.address} numberOfLines={1}>{business.address}</Text>
         </View>
       </View>
@@ -41,20 +43,18 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.backgroundCard,
     borderRadius: 12,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.small,
   },
   image: {
     width: '100%',
     height: 180,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.backgroundDark,
   },
   content: {
     padding: 16,
@@ -73,28 +73,32 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   featuredBadge: {
-    backgroundColor: '#4CAF50',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.neonRed,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
+    gap: 4,
+    ...SHADOWS.neonGlow,
   },
   featuredText: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   name: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: COLORS.textPrimary,
     marginBottom: 8,
   },
   description: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textSecondary,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -105,7 +109,7 @@ const styles = StyleSheet.create({
   address: {
     marginLeft: 4,
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textSecondary,
     flex: 1,
   },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { COLORS, SHADOWS } from '../utils/colors';
 
 interface CategoryCardProps {
   category: any;
@@ -30,7 +31,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 16,
     overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.backgroundCard,
+    borderWidth: 1,
+    borderColor: COLORS.neonRed,
+    ...SHADOWS.small,
   },
   image: {
     width: '100%',
@@ -39,20 +43,25 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     padding: 12,
     justifyContent: 'flex-end',
+    borderWidth: 1,
+    borderColor: COLORS.neonRed,
   },
   name: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#fff',
+    color: COLORS.textPrimary,
     marginBottom: 4,
+    textShadowColor: COLORS.neonRed,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 5,
   },
   count: {
     fontSize: 12,
-    color: '#fff',
-    opacity: 0.9,
+    color: COLORS.neonRed,
+    fontWeight: '600',
   },
 });
 
