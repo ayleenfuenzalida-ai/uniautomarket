@@ -41,38 +41,32 @@ export default function CreateBusinessScreen() {
   const loadCategories = async () => {
     try {
       const response = await categoriesAPI.getAll();
+      console.log('Categories loaded:', response.data.length);
       setCategories(response.data);
       if (response.data.length > 0) {
-        setSelectedCategory(response.data[0].id);
+        const firstCategoryId = response.data[0].id;
+        console.log('Setting default category:', firstCategoryId);
+        setSelectedCategory(firstCategoryId);
       }
     } catch (error) {
       console.error('Error loading categories:', error);
     }
   };
 
-  const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted === false) {
-      Alert.alert('Error', 'Se requiere permiso para acceder a las fotos');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [16, 9],
-      quality: 0.5,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets[0].base64) {
-      const base64String = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setImageBase64(base64String);
-    }
+  const handleCategorySelect = (categoryId: string) => {
+    console.log('Category selected:', categoryId);
+    setSelectedCategory(categoryId);
   };
 
   const handleSubmit = async () => {
+    console.log('=== SUBMIT DEBUG ===');
+    console.log('Name:', name);
+    console.log('Selected Category ID:', selectedCategory);
+    console.log('Description:', description);
+    console.log('Address:', address);
+    console.log('Owner Name:', ownerName);
+    console.log('Owner Email:', ownerEmail);
+    
     if (!name || !description || !address || !ownerName || !ownerEmail || !ownerPassword || !selectedCategory) {
       Alert.alert('Error', 'Por favor completa todos los campos obligatorios');
       return;
@@ -80,7 +74,7 @@ export default function CreateBusinessScreen() {
 
     setLoading(true);
     try {
-      const response = await businessesAPI.create({
+      const businessData = {
         name: name.trim(),
         category_id: selectedCategory,
         description: description.trim(),
@@ -91,9 +85,11 @@ export default function CreateBusinessScreen() {
         owner_name: ownerName.trim(),
         owner_email: ownerEmail.trim(),
         owner_password: ownerPassword,
-      });
-
-      console.log('Business created:', response.data);
+      };
+      
+      console.log('Sending business data:', JSON.stringify(businessData, null, 2));
+      const response = await businessesAPI.create(businessData);
+      console.log('Business created successfully:', response.data);
 
       Alert.alert('Éxito', 'Negocio creado correctamente', [
         {
@@ -103,6 +99,7 @@ export default function CreateBusinessScreen() {
       ]);
     } catch (error: any) {
       console.error('Error creating business:', error);
+      console.error('Error response:', error.response?.data);
       Alert.alert('Error', error.response?.data?.detail || 'Error al crear negocio');
     } finally {
       setLoading(false);
@@ -136,27 +133,33 @@ export default function CreateBusinessScreen() {
               onChangeText={setName}
             />
 
-            <Text style={styles.label}>Categoría *</Text>
+            <Text style={styles.label}>Categoría * (Selecciona solo una)</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-              {categories.map((category: any) => (
-                <TouchableOpacity
-                  key={category.id}
-                  style={[
-                    styles.categoryChip,
-                    selectedCategory === category.id && styles.categoryChipSelected,
-                  ]}
-                  onPress={() => setSelectedCategory(category.id)}
-                >
-                  <Text
+              {categories.map((category: any) => {
+                const isSelected = selectedCategory === category.id;
+                return (
+                  <TouchableOpacity
+                    key={category.id}
                     style={[
-                      styles.categoryChipText,
-                      selectedCategory === category.id && styles.categoryChipTextSelected,
+                      styles.categoryChip,
+                      isSelected && styles.categoryChipSelected,
                     ]}
+                    onPress={() => handleCategorySelect(category.id)}
                   >
-                    {category.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      style={[
+                        styles.categoryChipText,
+                        isSelected && styles.categoryChipTextSelected,
+                      ]}
+                    >
+                      {category.name}
+                    </Text>
+                    {isSelected && (
+                      <Ionicons name="checkmark-circle" size={16} color={COLORS.textPrimary} style={{ marginLeft: 4 }} />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
 
             <Text style={styles.label}>Descripción *</Text>
