@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { businessesAPI } from '../../src/services/api';
+import { COLORS, SHADOWS } from '../../src/utils/colors';
 
 export default function ManageBusinessesScreen() {
   const [businesses, setBusinesses] = useState([]);
@@ -69,7 +70,7 @@ export default function ManageBusinessesScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={COLORS.neonRed} />
       </View>
     );
   }
@@ -78,7 +79,7 @@ export default function ManageBusinessesScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
+          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Gestionar Negocios</Text>
       </View>
@@ -88,9 +89,11 @@ export default function ManageBusinessesScreen() {
           style={styles.addButton}
           onPress={() => router.push('/admin/businesses/create')}
         >
-          <Ionicons name="add-circle" size={24} color="#fff" />
+          <Ionicons name="add-circle" size={24} color={COLORS.textPrimary} />
           <Text style={styles.addButtonText}>Crear Nuevo Negocio</Text>
         </TouchableOpacity>
+
+        <Text style={styles.sectionTitle}>━━ Todos los Negocios ━━</Text>
 
         {businesses.map((business: any) => (
           <View key={business.id} style={styles.businessCard}>
@@ -98,8 +101,8 @@ export default function ManageBusinessesScreen() {
               <Text style={styles.businessName}>{business.name}</Text>
               {business.is_featured && (
                 <View style={styles.featuredBadge}>
-                  <Ionicons name="star" size={14} color="#fff" />
-                  <Text style={styles.featuredText}>Destacado</Text>
+                  <Ionicons name="star" size={14} color={COLORS.textPrimary} />
+                  <Text style={styles.featuredText}>DESTACADO</Text>
                 </View>
               )}
             </View>
@@ -108,16 +111,16 @@ export default function ManageBusinessesScreen() {
 
             <View style={styles.actions}>
               <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: business.is_featured ? '#FF9500' : '#34C759' }]}
+                style={[styles.actionButton, { backgroundColor: business.is_featured ? COLORS.warning : COLORS.success }]}
                 onPress={() => handleToggleFeatured(business.id)}
               >
                 <Ionicons
                   name={business.is_featured ? 'star-outline' : 'star'}
                   size={18}
-                  color="#fff"
+                  color={COLORS.textPrimary}
                 />
                 <Text style={styles.actionText}>
-                  {business.is_featured ? 'Quitar destacado' : 'Destacar'}
+                  {business.is_featured ? 'Quitar' : 'Destacar'}
                 </Text>
               </TouchableOpacity>
 
@@ -125,7 +128,7 @@ export default function ManageBusinessesScreen() {
                 style={[styles.actionButton, styles.deleteButton]}
                 onPress={() => handleDelete(business.id)}
               >
-                <Ionicons name="trash" size={18} color="#fff" />
+                <Ionicons name="trash" size={18} color={COLORS.textPrimary} />
                 <Text style={styles.actionText}>Eliminar</Text>
               </TouchableOpacity>
             </View>
@@ -139,20 +142,21 @@ export default function ManageBusinessesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    backgroundColor: COLORS.backgroundDark,
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.neonRed,
   },
   backButton: {
     marginRight: 16,
@@ -161,7 +165,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: COLORS.neonRed,
   },
   scrollContent: {
     padding: 16,
@@ -170,27 +174,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.neonRed,
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
+    ...SHADOWS.neonGlow,
   },
   addButtonText: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
   },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.neonRed,
+    textAlign: 'center',
+    marginVertical: 16,
+  },
   businessCard: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.backgroundCard,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.small,
   },
   businessHeader: {
     flexDirection: 'row',
@@ -201,31 +211,31 @@ const styles = StyleSheet.create({
   businessName: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: COLORS.textPrimary,
     flex: 1,
   },
   featuredBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.neonRed,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
     gap: 4,
   },
   featuredText: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   businessAddress: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textSecondary,
     marginBottom: 4,
   },
   businessRating: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textSecondary,
     marginBottom: 12,
   },
   actions: {
@@ -242,10 +252,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   deleteButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: COLORS.error,
   },
   actionText: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 12,
     fontWeight: '600',
   },

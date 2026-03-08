@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { reviewsAPI } from '../../src/services/api';
+import { COLORS } from '../../src/utils/colors';
 
 export default function ManageReviewsScreen() {
   const [reviews, setReviews] = useState([]);
@@ -106,20 +107,21 @@ export default function ManageReviewsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    backgroundColor: COLORS.backgroundDark,
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.neonRed,
   },
   backButton: {
     marginRight: 16,
@@ -128,16 +130,18 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: COLORS.neonRed,
   },
   scrollContent: {
     padding: 16,
   },
   reviewCard: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.backgroundCard,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -147,7 +151,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: COLORS.textPrimary,
   },
   ratingBadge: {
     flexDirection: 'row',
@@ -157,11 +161,11 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: COLORS.textPrimary,
   },
   comment: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textSecondary,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -177,17 +181,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   deleteButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: COLORS.error,
   },
   actionText: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 12,
     fontWeight: '600',
   },
   emptyText: {
     textAlign: 'center',
     fontSize: 14,
-    color: '#999',
+    color: COLORS.textMuted,
     paddingVertical: 32,
   },
 });
