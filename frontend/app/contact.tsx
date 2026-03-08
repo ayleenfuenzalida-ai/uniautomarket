@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { contactAPI } from '../../src/services/api';
+import { contactAPI } from '../src/services/api';
 
 export default function ContactScreen() {
   const [name, setName] = useState('');

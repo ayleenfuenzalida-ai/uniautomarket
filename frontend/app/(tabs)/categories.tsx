@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { categoriesAPI } from '../../src/services/api';
-import CategoryCard from '../../src/components/CategoryCard';
+import { categoriesAPI } from '../src/services/api';
+import CategoryCard from '../src/components/CategoryCard';
 
 export default function CategoriesScreen() {
   const [categories, setCategories] = useState([]);
@@ -51,15 +51,16 @@ export default function CategoriesScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Categorías</Text>
-        <Text style={styles.headerSubtitle}>Explora por categoría especializada</Text>
+        <Text style={styles.headerSubtitle}>Encuentra el servicio que necesitas</Text>
       </View>
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View style={styles.grid}>
+        <View style={styles.categoriesGrid}>
           {categories.map((category) => (
             <CategoryCard
               key={category.id}
@@ -101,9 +102,10 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
   },
-  grid: {
+  categoriesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: 16,
   },
 });

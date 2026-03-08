@@ -13,9 +13,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { categoriesAPI, businessesAPI, statsAPI } from '../../src/services/api';
-import CategoryCard from '../../src/components/CategoryCard';
-import BusinessCard from '../../src/components/BusinessCard';
+import { categoriesAPI, businessesAPI, statsAPI } from '../src/services/api';
+import CategoryCard from '../src/components/CategoryCard';
+import BusinessCard from '../src/components/BusinessCard';
 
 const { width } = Dimensions.get('window');
 
