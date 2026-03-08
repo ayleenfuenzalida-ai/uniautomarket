@@ -300,7 +300,9 @@ async def get_me(current_user: User = Depends(get_current_user)):
 async def get_categories():
     categories = await db.categories.find().sort("order", 1).to_list(100)
     for cat in categories:
-        cat["_id"] = str(cat["_id"])
+        cat_id = str(cat["_id"])
+        cat["_id"] = cat_id
+        cat["id"] = cat_id  # Add id field for frontend
     return categories
 
 @api_router.get("/categories/{category_id}", response_model=Category)
