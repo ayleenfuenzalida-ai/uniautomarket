@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { categoriesAPI } from '../src/services/api';
-import CategoryCard from '../src/components/CategoryCard';
+import { categoriesAPI } from '../../src/services/api';
+import CategoryCard from '../../src/components/CategoryCard';
 
 export default function CategoriesScreen() {
   const [categories, setCategories] = useState([]);

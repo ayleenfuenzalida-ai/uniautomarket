@@ -10,8 +10,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { businessesAPI } from '../src/services/api';
-import BusinessCard from '../src/components/BusinessCard';
+import { businessesAPI } from '../../src/services/api';
+import BusinessCard from '../../src/components/BusinessCard';
 import { debounce } from 'lodash';
 
 export default function SearchScreen() {
