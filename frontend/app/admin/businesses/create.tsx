@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { businessesAPI, categoriesAPI } from '../../../src/services/api';
+import { COLORS } from '../../../src/utils/colors';
 
 export default function CreateBusinessScreen() {
   const [categories, setCategories] = useState([]);
@@ -79,7 +80,7 @@ export default function CreateBusinessScreen() {
 
     setLoading(true);
     try {
-      await businessesAPI.create({
+      const response = await businessesAPI.create({
         name: name.trim(),
         category_id: selectedCategory,
         description: description.trim(),
@@ -92,6 +93,8 @@ export default function CreateBusinessScreen() {
         owner_password: ownerPassword,
       });
 
+      console.log('Business created:', response.data);
+
       Alert.alert('Éxito', 'Negocio creado correctamente', [
         {
           text: 'OK',
@@ -99,6 +102,7 @@ export default function CreateBusinessScreen() {
         },
       ]);
     } catch (error: any) {
+      console.error('Error creating business:', error);
       Alert.alert('Error', error.response?.data?.detail || 'Error al crear negocio');
     } finally {
       setLoading(false);
@@ -109,7 +113,7 @@ export default function CreateBusinessScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
+          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Crear Negocio</Text>
       </View>
@@ -119,19 +123,21 @@ export default function CreateBusinessScreen() {
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Text style={styles.sectionTitle}>Información del Negocio</Text>
+          {/* Business Info Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>━━ Información del Negocio ━━</Text>
 
-          <Text style={styles.label}>Nombre *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre del negocio"
-            value={name}
-            onChangeText={setName}
-          />
+            <Text style={styles.label}>Nombre *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre del negocio"
+              placeholderTextColor={COLORS.textMuted}
+              value={name}
+              onChangeText={setName}
+            />
 
-          <Text style={styles.label}>Categoría *</Text>
-          <View style={styles.pickerContainer}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <Text style={styles.label}>Categoría *</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
               {categories.map((category: any) => (
                 <TouchableOpacity
                   key={category.id}
@@ -152,86 +158,96 @@ export default function CreateBusinessScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
+
+            <Text style={styles.label}>Descripción *</Text>
+            <TextInput
+              style={styles.textArea}
+              placeholder="Descripción del negocio"
+              placeholderTextColor={COLORS.textMuted}
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+
+            <Text style={styles.label}>Dirección *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Dirección completa"
+              placeholderTextColor={COLORS.textMuted}
+              value={address}
+              onChangeText={setAddress}
+            />
+
+            <Text style={styles.label}>Teléfono</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="+56 9 1234 5678"
+              placeholderTextColor={COLORS.textMuted}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+            />
+
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="email@negocio.cl"
+              placeholderTextColor={COLORS.textMuted}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Text style={styles.label}>Imagen</Text>
+            <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+              {imageBase64 ? (
+                <Image source={{ uri: imageBase64 }} style={styles.imagePreview} />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <Ionicons name="image" size={48} color={COLORS.neonRed} />
+                  <Text style={styles.imagePlaceholderText}>Seleccionar imagen</Text>
+                </View>
+              )}
+            </TouchableOpacity>
           </View>
 
-          <Text style={styles.label}>Descripción *</Text>
-          <TextInput
-            style={styles.textArea}
-            placeholder="Descripción del negocio"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
+          {/* Owner Info Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>━━ Información del Dueño ━━</Text>
 
-          <Text style={styles.label}>Dirección *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Dirección completa"
-            value={address}
-            onChangeText={setAddress}
-          />
+            <Text style={styles.label}>Nombre completo *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre del dueño"
+              placeholderTextColor={COLORS.textMuted}
+              value={ownerName}
+              onChangeText={setOwnerName}
+            />
 
-          <Text style={styles.label}>Teléfono</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="+56 9 1234 5678"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-          />
+            <Text style={styles.label}>Email *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="email@dueno.cl"
+              placeholderTextColor={COLORS.textMuted}
+              value={ownerEmail}
+              onChangeText={setOwnerEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
 
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="email@negocio.cl"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-
-          <Text style={styles.label}>Imagen</Text>
-          <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-            {imageBase64 ? (
-              <Image source={{ uri: imageBase64 }} style={styles.imagePreview} />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Ionicons name="image" size={48} color="#ccc" />
-                <Text style={styles.imagePlaceholderText}>Seleccionar imagen</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
-          <Text style={styles.sectionTitle}>Información del Dueño</Text>
-
-          <Text style={styles.label}>Nombre completo *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre del dueño"
-            value={ownerName}
-            onChangeText={setOwnerName}
-          />
-
-          <Text style={styles.label}>Email *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="email@dueno.cl"
-            value={ownerEmail}
-            onChangeText={setOwnerEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-
-          <Text style={styles.label}>Contraseña *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Contraseña para el usuario"
-            value={ownerPassword}
-            onChangeText={setOwnerPassword}
-            secureTextEntry
-          />
+            <Text style={styles.label}>Contraseña *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Contraseña para el usuario"
+              placeholderTextColor={COLORS.textMuted}
+              value={ownerPassword}
+              onChangeText={setOwnerPassword}
+              secureTextEntry
+            />
+          </View>
 
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
@@ -239,9 +255,12 @@ export default function CreateBusinessScreen() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={COLORS.textPrimary} />
             ) : (
-              <Text style={styles.buttonText}>Crear Negocio</Text>
+              <>
+                <Ionicons name="add-circle" size={24} color={COLORS.textPrimary} />
+                <Text style={styles.buttonText}>  Crear Negocio</Text>
+              </>
             )}
           </TouchableOpacity>
         </ScrollView>
@@ -253,14 +272,15 @@ export default function CreateBusinessScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    backgroundColor: COLORS.backgroundDark,
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.neonRed,
   },
   backButton: {
     marginRight: 16,
@@ -269,7 +289,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: COLORS.neonRed,
   },
   keyboardView: {
     flex: 1,
@@ -277,56 +297,67 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
   },
+  section: {
+    marginBottom: 32,
+  },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#1a1a1a',
-    marginTop: 16,
-    marginBottom: 16,
+    color: COLORS.neonRed,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: COLORS.textSecondary,
     marginBottom: 8,
+    marginTop: 8,
   },
   input: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.backgroundCard,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     padding: 16,
     fontSize: 16,
-    color: '#1a1a1a',
-    marginBottom: 16,
+    color: COLORS.textPrimary,
+    marginBottom: 8,
   },
   textArea: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.backgroundCard,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     padding: 16,
     fontSize: 16,
-    color: '#1a1a1a',
+    color: COLORS.textPrimary,
     minHeight: 100,
-    marginBottom: 16,
+    marginBottom: 8,
   },
-  pickerContainer: {
+  categoryScroll: {
     marginBottom: 16,
   },
   categoryChip: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.backgroundCard,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 20,
     marginRight: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   categoryChipSelected: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.neonRed,
+    borderColor: COLORS.neonRed,
   },
   categoryChipText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textSecondary,
     fontWeight: '600',
   },
   categoryChipTextSelected: {
-    color: '#fff',
+    color: COLORS.textPrimary,
   },
   imageButton: {
     marginBottom: 16,
@@ -335,22 +366,28 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.neonRed,
   },
   imagePlaceholder: {
     width: '100%',
     height: 200,
     borderRadius: 12,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.backgroundCard,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+    borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
   },
   imagePlaceholderText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#999',
+    color: COLORS.textMuted,
   },
   button: {
-    backgroundColor: '#007AFF',
+    flexDirection: 'row',
+    backgroundColor: COLORS.neonRed,
     borderRadius: 12,
     height: 56,
     justifyContent: 'center',
@@ -362,7 +399,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: '600',
   },
